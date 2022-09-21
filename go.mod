@@ -1,4 +1,4 @@
-module github.com/mholt/caddy-event-exec
+module github.com/mholt/caddy-events-exec
 
 go 1.19
 
