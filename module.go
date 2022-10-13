@@ -86,10 +86,9 @@ func (eh *Handler) Handle(ctx context.Context, e caddyevents.Event) error {
 		expandedArgs[i] = repl.ReplaceAll(eh.Args[i], "")
 	}
 
+	var cancel context.CancelFunc
 	if eh.Timeout > 0 {
-		var cancel context.CancelFunc
 		ctx, cancel = context.WithTimeout(ctx, time.Duration(eh.Timeout))
-		defer cancel()
 	}
 
 	cmd := exec.CommandContext(ctx, eh.Command, expandedArgs...)
@@ -98,6 +97,10 @@ func (eh *Handler) Handle(ctx context.Context, e caddyevents.Event) error {
 	cmd.Stderr = os.Stderr
 
 	if eh.Foreground {
+		if cancel != nil {
+			defer cancel()
+		}
+
 		err := cmd.Run()
 
 		exitCode := cmd.ProcessState.ExitCode()
@@ -111,10 +114,14 @@ func (eh *Handler) Handle(ctx context.Context, e caddyevents.Event) error {
 	}
 
 	go func() {
+		if cancel != nil {
+			defer cancel()
+		}
 		if err := cmd.Run(); err != nil {
 			eh.logger.Error("background command failed", zap.Error(err))
 		}
 	}()
+
 	return nil
 }
 
