@@ -5,6 +5,9 @@ This is the `events.handlers.exec` Caddy module. It executes commands to handle 
 
 **It is EXPERIMENTAL and subject to change.** After getting some production experience, if demand is high enough and if this is generally useful to most users, we may move this into the standard Caddy distribution. It would be the only Caddy module that executes commands on the system, so we want to make sure it does not allow for _arbitrary_ commands to be executed.
 
+> [!NOTE]
+> This is not an official repository of the [Caddy Web Server](https://github.com/caddyserver) organization.
+
 ## Install
 
 Like any other Caddy plugin, [select it on the download page](https://caddyserver.com/download) to get a custom build, or use xcaddy to build from source:
