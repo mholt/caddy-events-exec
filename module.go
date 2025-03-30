@@ -7,9 +7,10 @@ import (
 	"os/exec"
 	"time"
 
+	"slices"
+
 	"github.com/caddyserver/caddy/v2"
 	"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile"
-	"github.com/caddyserver/caddy/v2/modules/caddyevents"
 	"go.uber.org/zap"
 )
 
@@ -75,7 +76,7 @@ func (eh *Handler) Provision(ctx caddy.Context) error {
 }
 
 // Handle handles the event.
-func (eh *Handler) Handle(ctx context.Context, e caddyevents.Event) error {
+func (eh *Handler) Handle(ctx context.Context, e caddy.Event) error {
 	repl := ctx.Value(caddy.ReplacerCtxKey).(*caddy.Replacer)
 
 	// expand placeholders in command args;
@@ -104,10 +105,8 @@ func (eh *Handler) Handle(ctx context.Context, e caddyevents.Event) error {
 		err := cmd.Run()
 
 		exitCode := cmd.ProcessState.ExitCode()
-		for _, abortCode := range eh.AbortCodes {
-			if exitCode == abortCode {
-				return fmt.Errorf("%w: %v", caddyevents.ErrAborted, err)
-			}
+		if slices.Contains(eh.AbortCodes, exitCode) {
+			return fmt.Errorf("%w: %v", caddy.ErrEventAborted, err)
 		}
 
 		return err
